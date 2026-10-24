@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberShield AI Antivirus v2.0</title>
+<style>
+:root{--bg:#050911;--panel:#0b1422;--panel2:#101d2d;--border:#1d334c;--text:#eaf4ff;--muted:#8da0b8;--cyan:#00e5ff;--green:#35f59a;--red:#ff526b;--yellow:#ffd45c;--purple:#a879ff}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+body{background:radial-gradient(circle at 20% 10%,#0b2137 0,transparent 30%),radial-gradient(circle at 80% 80%,#171331 0,transparent 30%),var(--bg);color:var(--text);min-height:100vh}
+header{height:72px;padding:0 25px;display:flex;justify-content:space-between;align-items:center;background:rgba(5,10,18,.92);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{font-size:23px;font-weight:800} .logo span{color:var(--cyan)}
+.protection{display:flex;align-items:center;gap:9px;color:var(--green);font-weight:bold;font-size:13px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 15px var(--green)}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 72px)}
+.sidebar{background:rgba(7,13,23,.94);border-right:1px solid var(--border);padding:18px 12px}
+.nav{padding:13px 15px;margin:5px 0;border-radius:10px;color:var(--muted);cursor:pointer;transition:.2s}
+.nav:hover{background:#102237;color:white}
+.nav.active{background:linear-gradient(90deg,#10334b,#102237);color:var(--cyan);border-left:3px solid var(--cyan)}
+main{padding:25px;max-width:1700px;width:100%;margin:auto} .page{display:none} .page.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}} h1{font-size:30px;margin-bottom:7px}
+h2{margin-bottom:7px} .subtitle{color:var(--muted);margin-bottom:23px}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.card{background:linear-gradient(145deg,#0c1726,#09111d);border:1px solid var(--border);border-radius:15px;padding:18px;min-height:105px}
+.card-title{color:var(--muted);font-size:13px} .number{margin-top:9px;font-size:27px;font-weight:800} .cyan{color:var(--cyan)}
+.green{color:var(--green)} .red{color:var(--red)} .yellow{color:var(--yellow)} .purple{color:var(--purple)}
+.grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}
+.panel{background:rgba(11,20,34,.92);border:1px solid var(--border);border-radius:16px;padding:21px;margin-bottom:18px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.panel-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}
+button{border:0;padding:12px 16px;border-radius:9px;cursor:pointer;font-weight:bold;background:var(--cyan);color:#001018;margin:4px;transition:.2s}
+button:hover{transform:translateY(-2px);filter:brightness(1.1)} button.secondary{background:#17283c;color:#dceaff}
+button.greenBtn{background:var(--green)} button.redBtn{background:var(--red);color:white} button.yellowBtn{background:var(--yellow)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none} .scanner{text-align:center}
+.ring{width:190px;height:190px;border-radius:50%;margin:20px auto;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(circle,#091522 58%,transparent 59%),conic-gradient(var(--cyan) 0deg,#17334a 0deg);box-shadow:0 0 30px rgba(0,229,255,.12)}
+.ring.scanning{animation:ringPulse 1.2s infinite} @keyframes ringPulse{50%{box-shadow:0 0 50px rgba(0,229,255,.35)}}
+.percent{font-size:32px;font-weight:bold;color:var(--cyan)}
+.progress{width:100%;height:14px;background:#06101b;border-radius:20px;overflow:hidden;border:1px solid #16283c}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:.2s}
+.statusText{color:var(--muted);margin:12px 0;min-height:20px}
+.statsLine{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}
+.mini{background:#091321;padding:13px;border-radius:10px;text-align:center} .mini b{display:block;font-size:20px;margin-top:5px}
+.log{background:#03070d;border:1px solid #152538;height:230px;overflow:auto;border-radius:10px;padding:13px;color:#9fb3ca;font-family:Consolas,monospace;font-size:12px;line-height:1.8}
+table{width:100%;border-collapse:collapse} th,td{padding:11px;border-bottom:1px solid #182a3e;text-align:left;font-size:13px}
+th{color:var(--cyan)} .badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}
+.safe{color:var(--green);background:#103626} .review{color:var(--yellow);background:#3d3213} .high{color:var(--red);background:#411522}
+.critical{color:white;background:#73172a} .quarantine{color:#c8a8ff;background:#2b1d46}
+textarea:focus{border-color:var(--cyan);box-shadow:0 0 18px rgba(0,229,255,.10)}
+.signal-item{padding:13px;margin:9px 0;border-radius:10px;background:#091522;border-left:3px solid var(--yellow)}
+.signal-item strong{display:block;margin-bottom:4px} .signal-item span{color:var(--muted);font-size:12px;line-height:1.45}
+input,select{width:100%;padding:12px;background:#07111e;color:white;border:1px solid #1b3048;border-radius:8px;margin:6px 0 12px;outline:none}
+input:focus{border-color:var(--cyan)} .search{margin-bottom:15px}
+.scoreCircle{width:180px;height:180px;border-radius:50%;border:8px solid #17334b;display:flex;justify-content:center;align-items:center;flex-direction:column;margin:10px auto 20px}
+.scoreCircle strong{font-size:42px;color:var(--green)} .featureGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.feature{background:#0d1929;border:1px solid var(--border);padding:17px;border-radius:12px}
+.feature h3{color:var(--cyan);margin-bottom:7px} .feature p{color:var(--muted);font-size:13px;line-height:1.5}
+.alert{padding:12px;border-radius:9px;margin-bottom:10px;background:#101e2e;border-left:3px solid var(--cyan)}
+.alert.redAlert{border-left-color:var(--red)} .alert.yellowAlert{border-left-color:var(--yellow)}
+.meter{height:15px;background:#06101b;border-radius:20px;overflow:hidden;margin:10px 0}
+.meter div{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));transition:.4s}
+.empty{color:var(--muted);text-align:center;padding:25px} footer{text-align:center;color:#61748c;padding:25px;font-size:12px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:750px){.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto}.nav{white-space:nowrap}.cards{grid-template-columns:repeat(2,1fr)}.featureGrid{grid-template-columns:1fr}.statsLine{grid-template-columns:repeat(2,1fr)}main{padding:15px}}
+@media(max-width:480px){.cards{grid-template-columns:1fr}header{padding:0 12px}.logo{font-size:18px}}
+:root{--live-a:#00e5ff;--live-b:#35f59a;--live-c:#a879ff;--live-glow:rgba(0,229,255,.20)}
+body{position:relative;overflow-x:hidden;background:#03070d}
+#liveBackground{position:fixed;inset:0;width:100%;height:100%;z-index:-5;pointer-events:none;opacity:1}
+.bg-vignette{position:fixed;inset:0;z-index:-4;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 0%,rgba(0,0,0,.08) 45%,rgba(0,0,0,.58) 100%)}
+.bg-grid{position:fixed;inset:-50%;z-index:-3;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(0,229,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.13) 1px,transparent 1px);background-size:55px 55px;transform:perspective(650px) rotateX(62deg) translateY(18%);animation:gridMove 18s linear infinite}
+@keyframes gridMove{from{background-position:0 0,0 0}to{background-position:0 550px,550px 0}}
+.live-theme-bar{position:fixed;right:18px;bottom:18px;z-index:150;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(3,8,16,.72);backdrop-filter:blur(14px);box-shadow:0 10px 35px rgba(0,0,0,.35),0 0 25px var(--live-glow);color:#dff8ff;font-size:11px;font-weight:800;letter-spacing:.7px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--live-a);box-shadow:0 0 14px var(--live-a);animation:livePulse 1.2s infinite}
+@keyframes livePulse{50%{transform:scale(1.5);opacity:.55}}
+.theme-mini{margin:0;padding:7px 9px;font-size:10px;background:rgba(255,255,255,.08);color:#eaf4ff;border:1px solid rgba(255,255,255,.1)}
+.live-theme-panel{position:relative;overflow:hidden}
+.live-theme-panel:before{content:"";position:absolute;inset:-2px;background:linear-gradient(120deg,transparent 20%,rgba(0,229,255,.08),transparent 45%,rgba(53,245,154,.06),transparent 70%);animation:themeSweep 7s linear infinite;pointer-events:none}
+@keyframes themeSweep{from{transform:translateX(-55%)}to{transform:translateX(55%)}}
+.theme-controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;position:relative}
+.theme-card{min-height:76px;margin:0;padding:12px;text-align:left;border:1px solid var(--border);background:rgba(7,17,30,.75);color:var(--text);box-shadow:none}
+.theme-card b{display:block;margin-bottom:5px} .theme-card small{color:var(--muted);font-size:11px}
+.theme-card:hover{border-color:var(--live-a);box-shadow:0 0 22px var(--live-glow)}
+.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;position:relative}
+.theme-options label{color:var(--muted);font-size:13px} .theme-options input[type="range"]{accent-color:var(--live-a);margin-top:10px}
+.switch-line{display:flex;align-items:center;gap:10px} .switch-line input{width:auto;margin:0}
+body.theme-matrix{--live-a:#39ff88;--live-b:#00ff41;--live-c:#0aff9d;--live-glow:rgba(0,255,65,.18)}
+body.theme-aurora{--live-a:#6fffe9;--live-b:#7dff8a;--live-c:#b58cff;--live-glow:rgba(125,255,138,.20)}
+body.theme-redteam{--live-a:#ff526b;--live-b:#ff7b54;--live-c:#ff2f92;--live-glow:rgba(255,50,90,.20)}
+body.theme-ice{--live-a:#70dfff;--live-b:#b9f3ff;--live-c:#8aa9ff;--live-glow:rgba(112,223,255,.20)}
+@media(max-width:900px){.theme-controls{grid-template-columns:repeat(2,1fr)}.theme-options{grid-template-columns:1fr}}
+@media(max-width:600px){.live-theme-bar{right:8px;bottom:8px;max-width:calc(100vw - 16px)}.theme-controls{grid-template-columns:1fr}}
+#phishingAI .panel{border-color:rgba(0,229,255,.22)} #phishingAI textarea{font-family:Arial,Helvetica,sans-serif}
+#phishingAI .phishing-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+#phishingAI .phishing-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:27px;background:linear-gradient(145deg,#102d43,#101d35);border:1px solid var(--cyan);box-shadow:0 0 24px rgba(0,229,255,.12)}
+#phishingAI .signal-item{padding:12px 14px;margin:8px 0;border:1px solid #1d334c;border-radius:10px;background:#091321}
+#phishingAI .signal-item b{color:var(--cyan)}
+</style>
+</head>
+<body>
+<canvas id="liveBackground"></canvas> <div class="bg-vignette"></div> <div class="bg-grid"></div> <div class="live-theme-bar">
+<span class="live-dot"></span> <span id="liveThemeName">CYBER NIGHT</span>
+<button onclick="cycleTheme()" class="theme-mini">THEME</button>
+<button onclick="toggleLiveBackground()" class="theme-mini" id="liveBgBtn">LIVE ON</button> </div> <header> <div class="logo">
+🛡️ Cyber<span>Shield</span> AI <small>v3.1</small> </div> <div class="protection"> <span class="dot"></span> PROTECTION ACTIVE </div>
+</header> <div class="layout"> <aside class="sidebar"> <div class="nav active" onclick="showPage('dashboard',this)"> 🏠 Dashboard </div>
+<div class="nav" onclick="showPage('scanner',this)"> 🔍 File Scanner </div> <div class="nav" onclick="showPage('apps',this)">
+📱 App Scanner </div> <div class="nav" onclick="showPage('threats',this)"> 🐛 Threat Center </div>
+<div class="nav" onclick="showPage('phishingAI',this)"> 🧠 Phishing AI </div> <div class="nav" onclick="showPage('tools',this)">
+🧰 Security Tools </div> <div class="nav" onclick="showPage('history',this)"> 📋 Scan History </div>
+<div class="nav" onclick="showPage('settings',this)"> ⚙️ Settings </div> </aside> <main> <section id="dashboard" class="page active">
+<h1>Security Dashboard</h1> <p class="subtitle"> AI-style security monitoring and file analysis center </p> <div class="cards">
+<div class="card"> <div class="card-title">Files Scanned</div> <div class="number cyan" id="filesCount">0</div> </div>
+<div class="card"> <div class="card-title">Threats / Warnings</div> <div class="number red" id="threatCount">0</div> </div>
+<div class="card"> <div class="card-title">Apps Scanned</div> <div class="number yellow" id="appsCount">0</div> </div>
+<div class="card"> <div class="card-title">Quarantined</div> <div class="number purple" id="quarantineCount">0</div> </div>
+<div class="card"> <div class="card-title">Security Score</div> <div class="number green" id="securityScore">100%</div> </div> </div>
+<div class="grid2"> <div class="panel scanner"> <h2>⚡ Smart Scanner</h2> <p class="subtitle">
+Run the educational scanner. </p> <div class="ring" id="ring"> <div class="percent" id="percent"> 0%
+</div> </div> <div class="progress"> <div class="bar" id="mainBar"></div> </div> <div class="statusText" id="scanStatus">
+Scanner ready. </div> <button onclick="startDemoScan()" class="yellowBtn"> ⚡ Scan </button> <br>
+<button onclick="pauseScan()" class="secondary" id="pauseBtn"> ⏸ Pause </button> <button onclick="stopScan()" class="redBtn"> ⛔ Stop
+</button> <div class="statsLine"> <div class="mini"> Files <b id="liveFiles">0</b> </div> <div class="mini"> Threats
+<b id="liveThreats">0</b> </div> <div class="mini"> Speed <b id="scanSpeed">0/s</b> </div> <div class="mini"> Effort
+<b id="scanEffort">0%</b> </div> </div> </div> <div> <div class="panel"> <h2>🛡️ Security Score</h2> <div class="scoreCircle">
+<strong id="bigScore">100</strong> <span>/100</span> </div> <div class="meter"> <div id="scoreMeter"></div> </div>
+<p class="subtitle" id="scoreMessage"> System currently looks safe. </p> </div> <div class="panel"> <h2>🔔 Security Alerts</h2>
+<div id="alerts"> <div class="alert"> System initialized successfully. </div> </div> </div> </div> </div> <div class="panel">
+<div class="panel-title"> <h2>📊 Live Activity</h2> <button onclick="clearLog()" class="secondary"> Clear </button> </div>
+<div class="log" id="activityLog"></div> </div> </section> <section id="scanner" class="page"> <h1>🔍 Advanced File Scanner</h1>
+<p class="subtitle"> Recursive file and folder analysis </p> <div class="panel"> <button onclick="startDemoScan()" class="yellowBtn"> ⚡ Scan </button> <p id="selectedFiles" class="subtitle">
+No files selected. </p> <div class="progress"> <div class="bar" id="scannerBar"></div> </div> <p id="scannerText"> Waiting for scan.
+</p> </div> <div class="panel"> <div class="panel-title"> <h2>📄 File Analysis Results</h2> <input class="search" id="fileSearch"
+placeholder="Search scanned files..." oninput="filterResults()" > </div> <table> <thead> <tr> <th>File</th> <th>Type</th> <th>Size</th>
+<th>Risk</th> <th>Score</th> <th>Action</th> </tr> </thead> <tbody id="resultsBody"> <tr> <td colspan="6" class="empty">
+No files scanned yet. </td> </tr> </tbody> </table> </div> </section> <section id="apps" class="page"> <h1>📱 Application Security</h1>
+<p class="subtitle"> Educational application-security scanner </p> <div class="panel"> <button onclick="scanApps()">
+🔎 Scan Applications </button> <div class="progress"> <div class="bar" id="appBar"></div> </div> <p id="appStatus"> Ready. </p> </div>
+<div class="panel"> <table> <thead> <tr> <th>Application</th> <th>Category</th> <th>Risk</th> <th>Security Status</th> </tr> </thead>
+<tbody id="appResults"> <tr> <td colspan="4" class="empty"> No application scan performed. </td> </tr> </tbody> </table> </div>
+</section> <section id="threats" class="page"> <h1>🐛 Threat Center</h1> <p class="subtitle"> Security findings and recommended actions
+</p> <div class="cards"> <div class="card"> <div class="card-title">High Risk</div> <div class="number red" id="highCount">0</div>
+</div> <div class="card"> <div class="card-title">Warnings</div> <div class="number yellow" id="warningCount">0</div> </div>
+<div class="card"> <div class="card-title">Clean</div> <div class="number green" id="cleanCount">0</div> </div> <div class="card">
+<div class="card-title">Quarantine</div> <div class="number purple" id="qCount">0</div> </div> <div class="card">
+<div class="card-title">Total</div> <div class="number cyan" id="totalCount">0</div> </div> </div> <div class="panel">
+<h2>Detection Categories</h2> <br> <div class="featureGrid"> <div class="feature"> <h3>Executable Review</h3> <p>
+Executable files are flagged for additional review because they can contain programs. </p> </div> <div class="feature">
+<h3>Script Review</h3> <p> Script extensions are given additional scrutiny by the demo engine. </p> </div> <div class="feature">
+<h3>Unknown Files</h3> <p> Unusual or unknown file types can be highlighted for manual review. </p> </div> </div> </div> </section>
+<section id="tools" class="page"> <h1>🧰 Security Tools</h1> <p class="subtitle"> Extra security utilities for your project </p>
+<div class="panel"> <h2>🌐 URL Safety Checker</h2> <input id="urlInput" placeholder="Enter a website address, e.g. https://example.com"
+> <button onclick="checkURL()"> 🔎 Analyse URL </button> <div id="urlResult"></div> </div> <div class="panel">
+<h2>🔐 Password Strength Meter</h2> <input id="passwordInput" type="password" placeholder="Type a password to test its strength"
+oninput="checkPassword()" > <div class="meter"> <div id="passwordMeter"></div> </div> <p id="passwordResult" class="subtitle">
+Enter a password to begin. </p> </div> <div class="panel"> <h2>🧹 Quarantine Center</h2> <p class="subtitle">
+Suspicious results can be moved into this educational quarantine list. </p> <table> <thead> <tr> <th>File</th> <th>Reason</th>
+<th>Status</th> </tr> </thead> <tbody id="quarantineBody"> <tr> <td colspan="3" class="empty"> Quarantine is empty. </td> </tr>
+</tbody> </table> <br> <button onclick="clearQuarantine()" class="secondary"> Clear Quarantine </button> </div> </section>
+<section id="phishingAI" class="page"> <div class="phishing-header"> <div class="phishing-icon">🧠</div> <div> <h1>Phishing AI</h1>
+<p class="subtitle" style="margin-bottom:0"> Dedicated phishing-awareness analysis screen for suspicious emails, messages and links
+</p> </div> </div> <div class="grid2"> <div class="panel"> <div class="panel-title"> <h2>🔎 Message Analysis</h2>
+<span class="badge safe">EDUCATIONAL</span> </div> <textarea id="phishingInput"
+placeholder="Paste a suspicious email or message here..."
+style="width:100%;min-height:210px;padding:14px;background:#07111e;color:white;border:1px solid #1b3048;border-radius:10px;resize:vertical;outline:none;line-height:1.5;"></textarea>
+<button onclick="analysePhishing()">🧠 Analyse with Phishing AI</button>
+<button onclick="loadPhishingDemo()" class="secondary">⚡ Load Demo</button>
+<button onclick="clearPhishing()" class="redBtn">Clear</button> <div class="progress" style="margin-top:14px">
+<div class="bar" id="phishingBar"></div> </div> <p id="phishingStatus" class="statusText">Ready to analyse.</p> </div>
+<div class="panel"> <h2>🎯 Phishing Risk Score</h2> <div class="scoreCircle" style="margin-top:20px">
+<strong id="phishingScore">0</strong> <span>/100</span> </div> <div class="meter"> <div id="phishingMeter"></div> </div>
+<p id="phishingVerdict" class="subtitle" style="text-align:center"> No message analysed yet. </p> </div> </div> <div class="panel">
+<div class="panel-title"> <h2>🚨 AI Detection Signals</h2> <span id="phishingBadge" class="badge safe">WAITING</span> </div>
+<div id="phishingSignals"> <div class="empty">Paste a message and start the analysis.</div> </div> </div> <div class="panel">
+<h2>🛡️ Safety Recommendations</h2> <div id="phishingAdvice" class="featureGrid"> <div class="feature"> <h3>Verify the sender</h3>
+<p>Check the sender address and contact the person or organisation using a trusted method.</p> </div> <div class="feature">
+<h3>Do not rush</h3> <p>Urgent threats, prizes and pressure to act quickly are common warning signs.</p> </div> <div class="feature">
+<h3>Check links carefully</h3> <p>Do not open unexpected links. Use a trusted website or official app instead.</p> </div> </div> </div>
+<div class="panel"> <h2>📘 How this demo works</h2> <p class="subtitle">
+The Phishing AI uses local educational heuristics such as urgency, requests for passwords or codes,
+suspicious links, reward claims, sender impersonation and unusual requests. It does not prove that a
+message is malicious and it does not send the entered text anywhere. </p> </div> </section> <section id="history" class="page">
+<h1>📋 Scan History</h1> <p class="subtitle"> Previous scan sessions stored locally in your browser </p> <div class="panel"> <table>
+<thead> <tr> <th>Date</th> <th>Files</th> <th>Threats</th> <th>Effort</th> <th>Score</th> </tr> </thead> <tbody id="historyBody"> <tr>
+<td colspan="5" class="empty"> No scans recorded. </td> </tr> </tbody> </table> <br> <button onclick="clearHistory()" class="redBtn">
+Delete History </button> </div> </section> <section id="settings" class="page"> <h1>⚙️ Security Settings</h1> <p class="subtitle">
+Configure the educational protection dashboard </p> <div class="panel"> <h2>Protection Modules</h2> <br> <label>
+<input type="checkbox" checked> Real-time protection simulation </label> <label> <input type="checkbox" checked>
+Suspicious extension detection </label> <label> <input type="checkbox" checked> Script analysis </label> <label>
+<input type="checkbox" checked> Application monitoring </label> <label> <input type="checkbox" checked> Security alerts </label>
+<label> <input type="checkbox" checked> Local scan history </label> </div> <div class="panel"> <h2>ℹ️ About CyberShield AI v3.1</h2>
+<br> <p class="subtitle"> CyberShield AI v3.1 is an educational antivirus dashboard.
+It demonstrates how a security application could organize file analysis, risk scoring, scanning statistics, alerts,
+quarantine and security tools. </p> <p class="subtitle"> Browser security prevents this webpage from silently inspecting
+the entire computer. Files and folders must be explicitly selected by the user. </p> </div> </section>
+<div class="panel live-theme-panel"> <div class="panel-title"> <h2>🎨 Live Background Themes</h2> <span class="badge safe">LIVE</span>
+</div> <p class="subtitle"> Switch between animated cyber environments. The background updates in real time. </p>
+<div class="theme-controls"> <button onclick="setTheme('cyber')" class="theme-card"> <b>🌌 Cyber Night</b><small>Neon network</small>
+</button> <button onclick="setTheme('matrix')" class="theme-card"> <b>🟢 Matrix Rain</b><small>Digital rain</small> </button>
+<button onclick="setTheme('aurora')" class="theme-card"> <b>🌈 Aurora</b><small>Moving aurora waves</small> </button>
+<button onclick="setTheme('redteam')" class="theme-card"> <b>🔴 Red Team</b><small>Threat operations</small> </button>
+<button onclick="setTheme('ice')" class="theme-card"> <b>❄️ Ice Core</b><small>Cold blue grid</small> </button> </div>
+<div class="theme-options"> <label> Animation speed <input id="bgSpeed" type="range" min="0" max="2" step="0.1" value="1"
+oninput="setBackgroundSpeed(this.value)"> </label> <label class="switch-line">
+<input id="autoTheme" type="checkbox" onchange="toggleAutoTheme(this.checked)"> Auto-cycle themes </label> </div> </div> <footer>
+CyberShield AI v3.1 • Educational Cybersecurity Project </footer> </main> </div>
+<script>
+let selectedFiles=[]; let results=[]; let quarantine=[]; let scanRunning=false; let scanPaused=false; let scanIndex=0; let scanStart=0;
+let totalThreats=0; let highRisk=0; let warnings=0; let cleanFiles=0; let scannedApps=0; function showPage(id,element){
+document.querySelectorAll(".page") .forEach(p=>p.classList.remove("active")); document.getElementById(id) .classList.add("active");
+document.querySelectorAll(".nav") .forEach(n=>n.classList.remove("active")); element.classList.add("active"); } function log(message){
+const box=document.getElementById("activityLog"); const time=new Date().toLocaleTimeString(); box.innerHTML +=
+`<div>[${time}] ${escapeHTML(message)}</div>`; box.scrollTop=box.scrollHeight; } function clearLog(){
+document.getElementById("activityLog").innerHTML=""; } function alertMessage(message,type="normal"){
+const box=document.getElementById("alerts"); const div=document.createElement("div"); div.className= "alert "+
+(type==="high" ? "redAlert" : type==="warning" ? "yellowAlert" : ""); div.innerHTML=escapeHTML(message); box.prepend(div); }
+async function chooseFiles(){ if(!window.showOpenFilePicker){ alert( "File selection requires a browser supporting " +
+"the File System Access API. Chrome or Edge is recommended." ); return; } try{ const handles= await window.showOpenFilePicker({
+multiple:true }); selectedFiles=[]; for(const handle of handles){ const file=await handle.getFile(); selectedFiles.push(file); }
+document.getElementById("selectedFiles") .innerHTML= `<b>${selectedFiles.length}</b> files selected.`; log(
+`${selectedFiles.length} files loaded into scanner.` ); startRealScan(); }catch(error){ log("File selection cancelled."); } }
+async function chooseFolder(){ if(!window.showDirectoryPicker){ alert( "Folder scanning requires Chrome or Edge." ); return; } try{
+const directory= await window.showDirectoryPicker(); selectedFiles=[]; await readDirectory(directory);
+document.getElementById("selectedFiles") .innerHTML= `<b>${selectedFiles.length}</b> files discovered recursively.`; log(
+`Folder scan prepared: ${selectedFiles.length} files discovered.` ); startRealScan(); }catch(error){
+log("Folder selection cancelled."); } } async function readDirectory(directory){ for await(const entry of directory.values()){
+if(entry.kind==="file"){ try{ const file= await entry.getFile(); selectedFiles.push(file); }catch(error){} }
+else if(entry.kind==="directory"){ await readDirectory(entry); } } } function startDemoScan(){ if(scanRunning) return; selectedFiles=[
+fakeFile( "School_Project.pdf", 420000, "application/pdf" ), fakeFile( "Family_Photo.jpg", 2300000, "image/jpeg" ), fakeFile(
+"Science_Presentation.pptx", 1800000, "application/pptx" ), fakeFile( "UnknownScript.js", 27000, "text/javascript" ), fakeFile(
+"GameInstaller.exe", 48000000, "application/octet-stream" ), fakeFile( "Notes.docx", 900000, "application/docx" ), fakeFile(
+"Backup.bat", 12000, "text/plain" ), fakeFile( "Music.mp3", 5300000, "audio/mpeg" ), fakeFile( "Archive.zip", 7000000,
+"application/zip" ), fakeFile( "UnknownTool.scr", 300000, "application/octet-stream" ), fakeFile( "Homework.txt", 5000, "text/plain" ),
+fakeFile( "Video.mp4", 15000000, "video/mp4" ) ]; document.getElementById("selectedFiles") .innerHTML=
+"<b>12</b> demonstration files loaded."; log("Educational demo dataset loaded."); startRealScan(); } function fakeFile(name,size,type){
+return { name:name, size:size, type:type }; } function startRealScan(){ if(scanRunning) return; if(selectedFiles.length===0){
+alert("No files selected."); return; } scanRunning=true; scanPaused=false; scanIndex=0; scanStart=Date.now(); results=[];
+totalThreats=0; highRisk=0; warnings=0; cleanFiles=0; document.getElementById("resultsBody").innerHTML="";
+document.getElementById("ring") .classList.add("scanning"); document.getElementById("pauseBtn") .innerText="⏸ Pause"; log(
+`Scan started: ${selectedFiles.length} files.` ); alertMessage( "File analysis started." ); scanNext(); } function scanNext(){
+if(!scanRunning) return; if(scanPaused){ setTimeout(scanNext,200); return; } if(scanIndex>=selectedFiles.length){ finishScan(); return;
+} const file=selectedFiles[scanIndex]; const analysis=analyseFile(file); results.push({ file:file, analysis:analysis });
+renderResult(file,analysis); scanIndex++; const progress= Math.round( scanIndex/selectedFiles.length*100 ); updateProgress(progress);
+updateLiveStats(); const delay= Math.max( 40, Math.min( 180, 3000/Math.max(selectedFiles.length,1) ) ); setTimeout(scanNext,delay); }
+function analyseFile(file){ const name=file.name.toLowerCase(); let risk=0; let status="SAFE"; let severity="Low"; let reasons=[];
+const highExtensions=[ ".exe", ".scr", ".bat", ".cmd", ".com" ]; const scriptExtensions=[ ".js", ".vbs", ".ps1", ".jar" ];
+const archiveExtensions=[ ".zip", ".rar", ".7z" ]; if(highExtensions.some(x=>name.endsWith(x))){ risk+=55; reasons.push(
+"Executable or command file requires review" ); } if(scriptExtensions.some(x=>name.endsWith(x))){ risk+=30; reasons.push(
+"Script file requires additional review" ); } if(archiveExtensions.some(x=>name.endsWith(x))){ risk+=10; reasons.push(
+"Archive should be checked before extracting" ); } if(name.includes("unknown")){ risk+=20; reasons.push( "Filename appears unusual" );
+} if(name.includes("installer")){ risk+=10; reasons.push( "Installer file detected" ); } if(file.size>500000000){ risk+=5;
+reasons.push( "Large file requires additional processing" ); } risk=Math.min(100,risk); if(risk>=70){ status="HIGH REVIEW";
+severity="High"; highRisk++; totalThreats++; } else if(risk>=30){ status="REVIEW"; severity="Medium"; warnings++; totalThreats++; }
+else{ status="SAFE"; severity="Low"; cleanFiles++; } return { risk:risk, status:status, severity:severity, reasons: reasons.length
+? reasons.join("; ") : "No suspicious indicators detected by demo rules." }; } function renderResult(file,a){ const tbody=
+document.getElementById("resultsBody"); const row=document.createElement("tr"); let badge="safe"; if(a.risk>=70)
+badge="high"; else if(a.risk>=30)
+badge="review"; row.dataset.name=file.name.toLowerCase();
+row.innerHTML=`  <td title="${escapeHTML(a.reasons)}"> ${escapeHTML(file.name)} </td>  <td> ${escapeHTML(file.type || "Unknown")} </td>  <td> ${formatBytes(file.size)} </td>  <td> <span class="badge ${badge}"> ${a.status} </span> </td>  <td> ${a.risk}/100 </td>  <td>  ${ a.risk>=30 ? `<button
+class="secondary"
+onclick="quarantineFile('${encodeURIComponent(file.name)}')"> Quarantine
+</button>` : `<span class="badge safe">OK</span>` }  </td>  `; tbody.appendChild(row); } function updateProgress(value){
+document.getElementById("mainBar") .style.width=value+"%"; document.getElementById("scannerBar") .style.width=value+"%";
+document.getElementById("percent") .innerText=value+"%"; document.getElementById("scanStatus") .innerText= scanRunning ?
+`Analysing file ${scanIndex} of ${selectedFiles.length}...` : "Scanner ready."; document.getElementById("scannerText") .innerText=
+`Analysis progress: ${value}%`; document.getElementById("ring") .style.background=
+`radial-gradient(circle,#091522 58%,transparent 59%),\n         conic-gradient(var(--cyan) ${value*3.6}deg,#17334a 0deg)`; }
+function updateLiveStats(){ document.getElementById("liveFiles") .innerText=scanIndex; document.getElementById("liveThreats")
+.innerText=totalThreats; const seconds= Math.max( 0.1, (Date.now()-scanStart)/1000 ); const speed= (scanIndex/seconds).toFixed(1);
+document.getElementById("scanSpeed") .innerText=speed+"/s"; const effort= Math.round( (scanIndex/
+Math.max(selectedFiles.length,1))*100 ); document.getElementById("scanEffort") .innerText=effort+"%"; } function finishScan(){
+scanRunning=false; document.getElementById("ring") .classList.remove("scanning"); document.getElementById("scanStatus") .innerText=
+"Scan completed successfully."; updateProgress(100); updateDashboard(); saveHistory(); log(
+`SCAN COMPLETE: ${selectedFiles.length} files analysed.` ); if(totalThreats>0){ alertMessage(
+`${totalThreats} file(s) require additional review.`, "warning" ); }else{ alertMessage(
+"Scan completed with no suspicious indicators.", "normal" ); } } function pauseScan(){ if(!scanRunning) return; scanPaused=!scanPaused;
+document.getElementById("pauseBtn") .innerText= scanPaused ? "▶ Resume" : "⏸ Pause"; log( scanPaused ? "Scan paused." : "Scan resumed."
+); } function stopScan(){ if(!scanRunning){ log("No active scan."); return; } scanRunning=false; scanPaused=false;
+document.getElementById("ring") .classList.remove("scanning"); document.getElementById("scanStatus") .innerText=
+"Scan stopped by user."; log("Scan stopped."); } function updateDashboard(){ document.getElementById("filesCount")
+.innerText=results.length; document.getElementById("threatCount") .innerText=totalThreats; document.getElementById("appsCount")
+.innerText=scannedApps; document.getElementById("quarantineCount") .innerText=quarantine.length; document.getElementById("highCount")
+.innerText=highRisk; document.getElementById("warningCount") .innerText=warnings; document.getElementById("cleanCount")
+.innerText=cleanFiles; document.getElementById("qCount") .innerText=quarantine.length; document.getElementById("totalCount")
+.innerText=results.length; const score= results.length===0 ? 100 : Math.max( 0, Math.round( ((results.length-totalThreats)/
+results.length)*100 ) ); document.getElementById("securityScore") .innerText=score+"%"; document.getElementById("bigScore")
+.innerText=score; document.getElementById("scoreMeter") .style.width=score+"%"; let message="System currently looks safe.";
+if(score<80)
+message="Some items require security review."; if(score<50)
+message="Several items require immediate review."; document.getElementById("scoreMessage") .innerText=message; }
+function quarantineFile(encodedName){ const name= decodeURIComponent(encodedName); const found= results.find( r=>r.file.name===name );
+if(!found) return; if( quarantine.some( x=>x.name===name ) ){ return; } quarantine.push({ name:name, reason: found.analysis.reasons,
+date:new Date().toLocaleString() }); renderQuarantine(); updateDashboard(); log( `${name} moved to educational quarantine.` );
+alertMessage( `${name} added to quarantine.`, "warning" ); } function renderQuarantine(){ const body=
+document.getElementById("quarantineBody"); if(quarantine.length===0){ body.innerHTML=
+`<tr> <td colspan="3" class="empty"> Quarantine is empty. </td> </tr>`; return; } body.innerHTML=""; quarantine.forEach(item=>{
+body.innerHTML+=`  <tr>  <td>${escapeHTML(item.name)}</td>  <td>${escapeHTML(item.reason)}</td>  <td> <span class="badge quarantine"> QUARANTINED </span> </td>  </tr>  `;
+}); } function clearQuarantine(){ quarantine=[]; renderQuarantine(); updateDashboard(); log("Educational quarantine cleared."); }
+function scanApps(){ const apps=[ ["System Browser","Internet","Low","SAFE"], ["File Manager","System","Low","SAFE"],
+["Media Player","Media","Low","SAFE"], ["Unknown Utility","Utility","Medium","REVIEW"], ["Game Launcher","Entertainment","Low","SAFE"],
+["Script Tool","Development","Medium","REVIEW"], ["Document Viewer","Productivity","Low","SAFE"],
+["Unknown Installer","Installer","High","REVIEW"] ]; const table= document.getElementById("appResults"); table.innerHTML=""; let i=0;
+function next(){ if(i>=apps.length){ scannedApps=apps.length; document.getElementById("appStatus") .innerText=
+"Application scan complete."; updateDashboard(); log( `${apps.length} applications analysed.` ); return; } const app=apps[i];
+let badge="safe"; if(app[3]==="REVIEW")
+badge=app[2]==="High" ? "high":"review";
+table.innerHTML+=`  <tr>  <td>${app[0]}</td> <td>${app[1]}</td> <td>${app[2]}</td>  <td> <span class="badge ${badge}"> ${app[3]} </span> </td>  </tr>  `;
+const progress= Math.round( ((i+1)/apps.length)*100 ); document.getElementById("appBar") .style.width=progress+"%";
+document.getElementById("appStatus") .innerText= `Analysing applications... ${progress}%`; i++; setTimeout(next,250); }
+log("Application scanner started."); next(); } function checkURL(){ const input= document.getElementById("urlInput") .value .trim();
+const result= document.getElementById("urlResult"); if(!input){ result.innerHTML=
+`<div class="alert yellowAlert"> Please enter a website address. </div>`; return; } let risk=0; let reasons=[]; try{ const url=
+new URL( input.startsWith("http") ? input : "https://"+input ); if(url.protocol!=="https:")
+{ risk+=35; reasons.push( "The address does not use HTTPS." ); } if(url.hostname.includes("@"))
+{ risk+=30; reasons.push( "Unusual URL structure." ); } if(url.hostname.split(".").length>4)
+{ risk+=10; reasons.push( "Many subdomains detected." ); } if(url.hostname.length>50)
+{ risk+=10; reasons.push( "Very long hostname." ); } if(risk>=50){ result.innerHTML=
+`<div class="alert redAlert"> ⚠️ URL requires caution.<br> ${reasons.join(" ")} <br><small> This is a heuristic check, not proof that the website is malicious. </small> </div>`;
+}else{ result.innerHTML=
+`<div class="alert"> ✅ No obvious warning signs found by the demo checker. <br><small> Always verify websites independently. </small> </div>`;
+} }catch(error){ result.innerHTML= `<div class="alert redAlert"> Invalid website address. </div>`; } } function checkPassword(){
+const password= document.getElementById("passwordInput") .value; const meter= document.getElementById("passwordMeter"); const result=
+document.getElementById("passwordResult"); let score=0; if(password.length>=8)
+score+=25; if(password.length>=12)
+score+=15; if(/[A-Z]/.test(password))
+score+=15; if(/[a-z]/.test(password))
+score+=15; if(/[0-9]/.test(password))
+score+=15; if(/[^A-Za-z0-9]/.test(password))
+score+=15; score=Math.min(100,score); meter.style.width=score+"%"; if(password.length===0){ result.innerText=
+"Enter a password to begin."; }else if(score<40){ result.innerText= "Weak — consider making it longer and more varied.";
+}else if(score<70){ result.innerText= "Medium — adding length and variety can improve it."; }else{ result.innerText=
+"Strong according to this simple educational meter."; } } function filterResults(){ const query= document.getElementById("fileSearch")
+.value .toLowerCase(); document .querySelectorAll("#resultsBody tr") .forEach(row=>{ const name= row.dataset.name || "";
+row.style.display= name.includes(query) ? "" : "none"; }); } function saveHistory(){ const history= JSON.parse( localStorage.getItem(
+"cybershield_history" ) || "[]" ); const score= results.length===0 ? 100 : Math.max( 0, Math.round( ((results.length-totalThreats)/
+results.length)*100 ) ); history.unshift({ date:new Date().toLocaleString(), files:selectedFiles.length, threats:totalThreats,
+effort:100, score:score }); localStorage.setItem( "cybershield_history", JSON.stringify( history.slice(0,30) ) ); renderHistory(); }
+function renderHistory(){ const body= document.getElementById("historyBody"); const history= JSON.parse( localStorage.getItem(
+"cybershield_history" ) || "[]" ); if(history.length===0){ body.innerHTML=
+`<tr> <td colspan="5" class="empty"> No scans recorded. </td> </tr>`; return; } body.innerHTML=""; history.forEach(item=>{
+body.innerHTML+=`  <tr>  <td>${escapeHTML(item.date)}</td>  <td>${item.files}</td>  <td>${item.threats}</td>  <td>${item.effort}%</td>  <td>${item.score}/100</td>  </tr>  `;
+}); } function clearHistory(){ if( confirm( "Delete all local scan history?" ) ){ localStorage.removeItem( "cybershield_history" );
+renderHistory(); log("Scan history deleted."); } } function formatBytes(bytes){ if(!bytes || bytes===0)
+return "0 B"; const units=[ "B","KB","MB","GB","TB" ]; const i= Math.floor( Math.log(bytes)/Math.log(1024) ); return(
+(bytes/Math.pow(1024,i)) .toFixed(2)
++" "+ units[i] ); } function escapeHTML(text){ return String(text) .replace(/&/g,"&amp;") .replace(/</g,"&lt;") .replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;") .replace(/'/g,"&#039;"); } const liveCanvas = document.getElementById("liveBackground");
+const liveCtx = liveCanvas.getContext("2d"); let liveTheme = localStorage.getItem("cybershield_live_theme") || "cyber";
+let liveEnabled = localStorage.getItem("cybershield_live_enabled") !== "false";
+let liveSpeed = Number(localStorage.getItem("cybershield_live_speed") || 1);
+let autoTheme = localStorage.getItem("cybershield_auto_theme") === "true"; let autoThemeTimer = null; let liveFrame = 0;
+const liveThemes = { cyber: { name:"CYBER NIGHT", a:"#00e5ff", b:"#35f59a", c:"#a879ff", density:70, rain:false, wave:false },
+matrix: { name:"MATRIX RAIN", a:"#39ff88", b:"#00ff41", c:"#0aff9d", density:95, rain:true, wave:false }, aurora: { name:"AURORA FLOW",
+a:"#6fffe9", b:"#7dff8a", c:"#b58cff", density:48, rain:false, wave:true }, redteam: { name:"RED TEAM",
+a:"#ff526b", b:"#ff7b54", c:"#ff2f92", density:78, rain:false, wave:false }, ice: { name:"ICE CORE",
+a:"#70dfff", b:"#b9f3ff", c:"#8aa9ff", density:58, rain:false, wave:true } }; let particles = []; let matrixColumns = [];
+function resizeLiveCanvas(){ const dpr = Math.min(window.devicePixelRatio || 1, 2); liveCanvas.width = innerWidth * dpr;
+liveCanvas.height = innerHeight * dpr; liveCanvas.style.width = innerWidth + "px"; liveCanvas.style.height = innerHeight + "px";
+liveCtx.setTransform(dpr,0,0,dpr,0,0); matrixColumns = Array.from( {length:Math.ceil(innerWidth/18)}, () => Math.random()*innerHeight
+); } window.addEventListener("resize",resizeLiveCanvas); resizeLiveCanvas(); function rebuildParticles(){
+const t = liveThemes[liveTheme]; particles = Array.from({length:t.density},()=>({ x:Math.random()*innerWidth,
+y:Math.random()*innerHeight, vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35, r:Math.random()*2.2+.5, p:Math.random()*Math.PI*2
+})); } function hexToRgb(hex){ const n=parseInt(hex.replace("#",""),16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
+function rgba(hex,a){ const c=hexToRgb(hex); return `rgba(${c.r},${c.g},${c.b},${a})`; } function drawCyber(){
+const t=liveThemes[liveTheme]; liveCtx.clearRect(0,0,innerWidth,innerHeight); const g=liveCtx.createRadialGradient(
+innerWidth*.5,innerHeight*.45,0, innerWidth*.5,innerHeight*.45,Math.max(innerWidth,innerHeight)*.75 ); g.addColorStop(0,rgba(t.a,.08));
+g.addColorStop(.45,rgba(t.c,.035)); g.addColorStop(1,"rgba(0,0,0,0)"); liveCtx.fillStyle=g;
+liveCtx.fillRect(0,0,innerWidth,innerHeight); particles.forEach((p,i)=>{ p.x += p.vx*liveSpeed; p.y += p.vy*liveSpeed;
+p.p += .015*liveSpeed; if(p.x<0)p.x=innerWidth; if(p.x>innerWidth)p.x=0; if(p.y<0)p.y=innerHeight; if(p.y>innerHeight)p.y=0;
+const pulse=.45+.35*Math.sin(p.p); liveCtx.beginPath(); liveCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+liveCtx.fillStyle=rgba(i%3===0?t.a:i%3===1?t.b:t.c,pulse); liveCtx.fill(); }); const maxDist=125; for(let i=0;i<particles.length;i++){
+for(let j=i+1;j<particles.length;j++){ const a=particles[i],b=particles[j]; const dx=a.x-b.x,dy=a.y-b.y;
+const d=Math.sqrt(dx*dx+dy*dy); if(d<maxDist){ liveCtx.beginPath(); liveCtx.moveTo(a.x,a.y); liveCtx.lineTo(b.x,b.y);
+liveCtx.strokeStyle=rgba(t.a,(1-d/maxDist)*.11); liveCtx.lineWidth=.7; liveCtx.stroke(); } } } } function drawMatrix(){
+const t=liveThemes.matrix; liveCtx.fillStyle="rgba(0,0,0,.12)"; liveCtx.fillRect(0,0,innerWidth,innerHeight);
+liveCtx.font="13px Consolas, monospace"; for(let i=0;i<matrixColumns.length;i++){ const x=i*18; const y=matrixColumns[i];
+const chars="01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>[]{}#$%"; const ch=chars[Math.floor(Math.random()*chars.length)];
+liveCtx.fillStyle=rgba(t.a,.72); liveCtx.fillText(ch,x,y); matrixColumns[i] += (7+Math.random()*12)*liveSpeed;
+if(matrixColumns[i]>innerHeight+30)
+matrixColumns[i]=-Math.random()*innerHeight; } } function drawAurora(){ const t=liveThemes[liveTheme];
+liveCtx.clearRect(0,0,innerWidth,innerHeight); for(let band=0;band<4;band++){ liveCtx.beginPath(); const amp=65+band*18;
+const base=innerHeight*(.28+band*.12); for(let x=0;x<=innerWidth;x+=12){ const y=base
++Math.sin(x*.004+liveFrame*.0012*liveSpeed+band)*amp
++Math.sin(x*.009-liveFrame*.0007*liveSpeed)*25; if(x===0) liveCtx.moveTo(x,y); else liveCtx.lineTo(x,y); }
+liveCtx.lineTo(innerWidth,innerHeight); liveCtx.lineTo(0,innerHeight); liveCtx.closePath();
+const grad=liveCtx.createLinearGradient(0,base-100,0,innerHeight); grad.addColorStop(0,rgba(band%2?t.b:t.c,.055));
+grad.addColorStop(.45,rgba(t.a,.035)); grad.addColorStop(1,"rgba(0,0,0,0)"); liveCtx.fillStyle=grad; liveCtx.fill(); }
+particles.forEach(p=>{ p.x += p.vx*liveSpeed; p.y += p.vy*liveSpeed; if(p.x<0||p.x>innerWidth)p.vx*=-1;
+if(p.y<0||p.y>innerHeight)p.vy*=-1; liveCtx.beginPath(); liveCtx.arc(p.x,p.y,p.r,0,Math.PI*2); liveCtx.fillStyle=rgba(t.a,.55);
+liveCtx.fill(); }); } function drawLiveBackground(){ if(!liveEnabled){ liveCtx.clearRect(0,0,innerWidth,innerHeight); return; }
+liveFrame++; if(liveTheme==="matrix") drawMatrix(); else if(liveThemes[liveTheme].wave) drawAurora(); else drawCyber();
+requestAnimationFrame(drawLiveBackground); } function applyThemeClass(){ document.body.classList.remove(
+"theme-matrix","theme-aurora","theme-redteam","theme-ice" ); if(liveTheme!=="cyber")
+document.body.classList.add("theme-"+liveTheme); const t=liveThemes[liveTheme];
+document.documentElement.style.setProperty("--live-a",t.a); document.documentElement.style.setProperty("--live-b",t.b);
+document.documentElement.style.setProperty("--live-c",t.c); document.getElementById("liveThemeName").innerText=t.name;
+localStorage.setItem("cybershield_live_theme",liveTheme); rebuildParticles(); } function setTheme(theme){
+if(!liveThemes[theme]) return; liveTheme=theme; applyThemeClass(); log("Live background changed to "+liveThemes[theme].name+"."); }
+function cycleTheme(){ const names=Object.keys(liveThemes); const next=(names.indexOf(liveTheme)+1)%names.length;
+setTheme(names[next]); } function toggleLiveBackground(){ liveEnabled=!liveEnabled;
+localStorage.setItem("cybershield_live_enabled",liveEnabled);
+document.getElementById("liveBgBtn").innerText=liveEnabled?"LIVE ON":"LIVE OFF"; if(liveEnabled){
+requestAnimationFrame(drawLiveBackground); log("Live background enabled."); }else{ liveCtx.clearRect(0,0,innerWidth,innerHeight);
+log("Live background disabled."); } } function setBackgroundSpeed(value){ liveSpeed=Number(value);
+localStorage.setItem("cybershield_live_speed",liveSpeed); } function toggleAutoTheme(enabled){ autoTheme=enabled;
+localStorage.setItem("cybershield_auto_theme",autoTheme); clearInterval(autoThemeTimer); if(autoTheme){
+autoThemeTimer=setInterval(cycleTheme,20000); log("Automatic theme cycling enabled."); }else{ log("Automatic theme cycling disabled.");
+} } function initializeLiveBackground(){ applyThemeClass(); const speed=document.getElementById("bgSpeed");
+if(speed) speed.value=liveSpeed; const auto=document.getElementById("autoTheme"); if(auto) auto.checked=autoTheme;
+document.getElementById("liveBgBtn").innerText= liveEnabled?"LIVE ON":"LIVE OFF";
+if(autoTheme) autoThemeTimer=setInterval(cycleTheme,20000); if(liveEnabled) requestAnimationFrame(drawLiveBackground); }
+function analysePhishing(){ const input=document.getElementById("phishingInput").value.trim();
+const bar=document.getElementById("phishingBar"); const status=document.getElementById("phishingStatus"); if(!input){
+status.innerText="Paste a message first."; document.getElementById("phishingSignals").innerHTML=
+'<div class="alert yellowAlert">Please enter a suspicious message or email for analysis.</div>'; return; } bar.style.width="25%";
+status.innerText="AI-style engine checking language and indicators..."; setTimeout(()=>{ const text=input.toLowerCase(); let score=0;
+const signals=[]; const rules=[ { patterns:["urgent","immediately","act now","within 24 hours","final warning","last chance"],
+points:18, title:"Urgency or pressure", detail:"The message tries to make the reader act quickly." }, {
+patterns:["password","passcode","login","sign in","verification code","otp","one-time code"], points:25,
+title:"Credential or code request", detail:"Requests for passwords, login details or verification codes are high-risk signals." }, {
+patterns:["gift card","prize","winner","reward","lottery","you have won","free money"], points:20, title:"Reward or prize claim",
+detail:"Unexpected prizes or financial rewards are common phishing themes." }, {
+patterns:["click here","verify your account","confirm your account","update your account"], points:17, title:"Action request",
+detail:"The message asks the recipient to click or verify an account." }, {
+patterns:["suspended","blocked","locked","account will be closed","legal action"], points:17, title:"Threat or account pressure",
+detail:"Threatening consequences can be used to force quick decisions." }, { patterns:["dear customer","dear user","valued customer"],
+points:8, title:"Generic greeting", detail:"A generic greeting may indicate a mass message rather than a personalised notice." } ];
+rules.forEach(rule=>{ if(rule.patterns.some(p=>text.includes(p))){ score+=rule.points; signals.push(rule); } });
+const urls=(text.match(/https?:\/\/|www\.|bit\.ly|tinyurl|t\.co/g)||[]).length; if(urls){ score+=Math.min(22,urls*11); signals.push({
+title:"Link indicator", detail:"The message contains a web-link pattern. Treat unexpected links with caution." }); }
+const emailPattern=/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/i; if(emailPattern.test(input)){ signals.push({ title:"Email address detected",
+detail:"Review the full sender address rather than trusting the display name." }); } score=Math.min(100,score); let verdict="LOW RISK";
+let badge="safe"; if(score>=70){ verdict="HIGH PHISHING RISK"; badge="high"; }else if(score>=40){ verdict="SUSPICIOUS — REVIEW";
+badge="review"; } bar.style.width="100%"; document.getElementById("phishingScore").innerText=score;
+document.getElementById("phishingMeter").style.width=score+"%"; document.getElementById("phishingVerdict").innerText=verdict;
+document.getElementById("phishingBadge").innerText=verdict; const badgeEl=document.getElementById("phishingBadge");
+badgeEl.className="badge "+badge; const signalBox=document.getElementById("phishingSignals"); if(signals.length===0){
+signalBox.innerHTML=
+'<div class="alert">✅ No obvious phishing signals were found by this educational demo. Still verify unexpected messages independently.</div>';
+}else{ signalBox.innerHTML=signals.map(s=>
+`<div class="signal-item"> <strong>⚠️ ${escapeHTML(s.title)}</strong> <span>${escapeHTML(s.detail)}</span> </div>` ).join(""); }
+document.getElementById("phishingAdvice").innerHTML=` <div class="feature"> <h3>1. Verify</h3> <p>Contact the organisation through an official website or known phone number.</p> </div> <div class="feature"> <h3>2. Don't share codes</h3> <p>Never give passwords, OTPs or recovery codes because of an unexpected message.</p> </div> <div class="feature"> <h3>3. Check links</h3> <p>Do not open suspicious links. Navigate to the official site yourself instead.</p> </div> `;
+status.innerText="Analysis complete — educational heuristic result.";
+log("Phishing AI analysed a message. Risk score: "+score+"/100."); },500); } function loadPhishingDemo(){
+document.getElementById("phishingInput").value=
+`URGENT: Your account has been selected for a reward.\nVerify your account immediately and enter your password and verification code.\nClick here to confirm before your account is suspended.`;
+document.getElementById("phishingStatus").innerText="Demo message loaded."; log("Phishing AI demonstration message loaded."); }
+function clearPhishing(){ document.getElementById("phishingInput").value=""; document.getElementById("phishingBar").style.width="0%";
+document.getElementById("phishingScore").innerText="0"; document.getElementById("phishingMeter").style.width="0%";
+document.getElementById("phishingVerdict").innerText="No message analysed yet.";
+document.getElementById("phishingBadge").innerText="WAITING"; document.getElementById("phishingBadge").className="badge safe";
+document.getElementById("phishingSignals").innerHTML= '<div class="empty">Paste a message and start the analysis.</div>';
+document.getElementById("phishingStatus").innerText="Ready to analyse."; } renderHistory(); renderQuarantine(); updateDashboard();
+log("CyberShield AI v3.1 initialized."); log("Threat-analysis engine loaded."); log("File scanner ready.");
+log("Application scanner ready."); log("Security tools ready."); log("Protection dashboard active."); initializeLiveBackground();
+</script>
+</body>
+</html>
